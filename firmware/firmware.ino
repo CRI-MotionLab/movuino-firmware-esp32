@@ -1,3 +1,5 @@
+#define ESPxx 1
+
 #include "Router.h"
 #include "Config.h"
 #include "Neopix.h"
@@ -6,7 +8,7 @@
 #include "Sensors.h"
 #include "SerialInterface.h"
 #include "WiFiInterface.h"
-// #include "AccessPoint.h"
+#include "AccessPoint.h"
 
 #include "globals.h"
 
@@ -19,7 +21,7 @@ Neopix neopix;
 SerialInterface serial;
 WiFiInterface wifi;
 
-// AccessPoint *ap;
+AccessPoint *ap;
 
 WiFiBootMode mode;
 
@@ -29,9 +31,9 @@ void setup() {
   // pinMode(pinLedBat, OUTPUT); // pin for the battery led
   // pinMode(pinVibro, OUTPUT); // pin for the vibrator
 
-  // mode = checkBootMode();
+  mode = checkBootMode();
 
-  // if (mode == WiFiStation) {
+  if (mode == WiFiStation) {
     // Wire.begin();
     // Wire.setClock(400000);
 
@@ -41,18 +43,18 @@ void setup() {
   // delay(5000);
       
     router.init(&config, &button, &neopix, &sensors, &vibrator, &serial, &wifi);
-  // } else {
-  //   ap = new AccessPoint();
-  //   ap->init(&config);
-  // }
+  } else {
+    ap = new AccessPoint();
+    ap->init(&config);
+  }
 }
 
 void loop() {
-  // if (mode == WiFiStation) {
+  if (mode == WiFiStation) {
     router.update();
-  // } else {
-  //   ap->update();
-  // }
+  } else {
+    ap->update();
+  }
 
   delay(1); // let the board breathe
   // Serial.println("looping");

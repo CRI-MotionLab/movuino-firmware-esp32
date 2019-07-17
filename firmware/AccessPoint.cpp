@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <FS.h>
 
-#ifdef ESP32
+// #ifdef ESP32
 #include <SPIFFS.h>
-#endif
+// #endif
 
 // #include <ESP8266WiFi.h>
 #include <WiFi.h>
