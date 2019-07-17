@@ -45,17 +45,17 @@ void setupGUI() {
         ;
   serialddl.setItemHeight(20);
   serialddl.setBarHeight(15);
-  serialddl.captionLabel().set("SELECT ARDUINO SERIAL PORT");
-  serialddl.captionLabel().style().marginTop = 3;
-  serialddl.captionLabel().style().marginLeft = 3;
-  serialddl.valueLabel().style().marginTop = 3;
+  serialddl.setCaptionLabel("SELECT ARDUINO SERIAL PORT");
+  //serialddl.captionLabel().style().marginTop = 3;
+  //serialddl.captionLabel().style().marginLeft = 3;
+  //serialddl.valueLabel().style().marginTop = 3;
   //set the serial options
   String SerialList[] = Serial.list(); 
   for (int i=0;i<SerialList.length;i++) {
     String portName = SerialList[i];
     serialddl.addItem(portName, i);
   }
-  serialddl.setIndex(0);
+  //serialddl.setIndex(0);
 
   //setup the baud list
   baudddl = cp5.addDropdownList("BaudRate")
@@ -64,16 +64,16 @@ void setupGUI() {
         ;
   baudddl.setItemHeight(20);
   baudddl.setBarHeight(15);
-  baudddl.captionLabel().set("SELECT THE BAUD RATE");
-  baudddl.captionLabel().style().marginTop = 3;
-  baudddl.captionLabel().style().marginLeft = 3;
-  baudddl.valueLabel().style().marginTop = 3;
+  baudddl.setCaptionLabel("SELECT THE BAUD RATE");
+  //baudddl.captionLabel().style().marginTop = 3;
+  //baudddl.captionLabel().style().marginLeft = 3;
+  //baudddl.valueLabel().style().marginTop = 3;
   //the baud options
   for (int i=0;i<serialRateStrings.length;i++) {
     String baudString = serialRateStrings[i];
     baudddl.addItem(baudString, i);
   }
-  baudddl.setIndex(4);
+  //baudddl.setIndex(4);
 
   //udp IP/port
   ipAddressField = cp5.addTextfield("IP address")
@@ -156,7 +156,7 @@ public void START(int theValue) {
   applicationRunning = true;
 }
 
-//hide all the controls and show the stop button
+//hide all the controls and show the stop button, cuando se da start
 void hideControls() {
   serialddl.hide();
   baudddl.hide();
@@ -164,7 +164,7 @@ void hideControls() {
   outgoingPortField.hide();
   incomingPortField.hide();
   ipAddressField.hide();
-  incomingPacket.show();
+  incomingPacket.show(); // se ve incomingPacket
   //show the stop button
   stopButton.show();
 }
@@ -195,11 +195,11 @@ public void STOP() {
 //the Serial communcation to the Arduino
 Serial serial;
 
-String[] serialRateStrings = {
-  "300", "1200", "2400", "4800", "9600", "14400", 
-  "19200", "28800", "38400", "57600", "115200"
+String[] serialRateStrings = { //less baudrates, only hi speeds
+   
+  "19200", "28800", "38400", "57600", "115200", "230400", "345600", "460800"
 };
-int baud = 9600;
+int baud = 460800;
 int serialListNumber = 0;
 
 ArrayList<Byte> serialBuffer = new ArrayList<Byte>();
@@ -214,6 +214,7 @@ void stopSerial() {
 
 void serialEvent(Serial serial) { 
   //decode the message
+  //println (serial.read());
   while (serial.available () > 0) {
     slipDecode(byte(serial.read())); 
   }
@@ -271,7 +272,7 @@ void slipDecode(byte incoming) {
     //send off the packet
     SerialSendToUDP();
   } 
-  else if (incoming != slipesc) {
+  else {
     serialBuffer.add(incoming);
   }
 }
@@ -297,12 +298,12 @@ void slipEncode(byte incoming) {
 UDP udp;
 
 int inPort = 9000;
-int outPort = 9001;
-String ipAddress = "127.0.0.1";
+int outPort = 10001;
+String ipAddress = "192.168.0.12";
 
 void setupUDP() {
   udp = new UDP( this, inPort );
-  //udp.log( true );     // <-- printout the connection activity
+  udp.log( true );     // <-- printout the connection activity
   udp.listen( true );
 }
 
@@ -372,4 +373,3 @@ void drawIncomingSerial() {
 void drawIncomingUDP() {
   lastUDPPacket = millis();
 }
-

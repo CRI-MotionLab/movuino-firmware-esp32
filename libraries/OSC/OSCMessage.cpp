@@ -2,24 +2,24 @@
  Written by Yotam Mann, The Center for New Music and Audio Technologies,
  University of California, Berkeley.  Copyright (c) 2012, The Regents of
  the University of California (Regents).
- 
+
  Permission to use, copy, modify, distribute, and distribute modified versions
  of this software and its documentation without fee and without a signed
  licensing agreement, is hereby granted, provided that the above copyright
  notice, this paragraph and the following two paragraphs appear in all copies,
  modifications, and distributions.
- 
+
  IN NO EVENT SHALL REGENTS BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT,
  SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING
  OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF REGENTS HAS
  BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
+
  REGENTS SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
  PURPOSE. THE SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED
  HEREUNDER IS PROVIDED "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE
  MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
- 
+
  For bug reports and feature requests please email me at yotam@cnmat.berkeley.edu
  */
 
@@ -96,6 +96,7 @@ OSCMessage& OSCMessage::empty(){
     dataCount = 0;
     decodeState = STANDBY;
     clearIncomingBuffer();
+    return *this;
 }
 
 //COPY
@@ -128,10 +129,10 @@ int32_t OSCMessage::getInt(int position){
 	if (!hasError()){
 		return datum->getInt();
     } else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (int32_t)NULL;
         #else
-            return -1; 
+            return -1;
         #endif
     }
 }
@@ -148,10 +149,10 @@ float OSCMessage::getFloat(int position){
 	if (!hasError()){
 		return datum->getFloat();
     } else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (float)NULL;
         #else
-            return -1; 
+            return -1;
         #endif
     }
 }
@@ -161,10 +162,10 @@ double OSCMessage::getDouble(int position){
 	if (!hasError()){
 		return datum->getDouble();
     } else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (double)NULL;
         #else
-            return -1; 
+            return -1;
         #endif
     }
 }
@@ -174,10 +175,24 @@ bool  OSCMessage::getBoolean(int position){
 	if (!hasError()){
 		return datum->getBoolean();
     } else {
-        #ifndef ESP8266
+        #ifndef ESPxx
             return NULL;
         #else
-            return -1; 
+            return -1;
+        #endif
+    }
+}
+
+
+int OSCMessage::getString(int position, char * buffer){
+    OSCData * datum = getOSCData(position);
+    if (!hasError()){
+        return datum->getString(buffer, datum->bytes);
+    } else {
+        #ifndef ESPxx
+            return (int)NULL;
+        #else
+            return -1;
         #endif
     }
 }
@@ -189,27 +204,82 @@ int OSCMessage::getString(int position, char * buffer, int bufferSize){
         int copyBytes = bufferSize < datum->bytes? bufferSize : datum->bytes;
 		return datum->getString(buffer, copyBytes);
     } else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (int)NULL;
         #else
-            return -1; 
+            return -1;
         #endif
     }
 }
 
-int OSCMessage::getBlob(int position, uint8_t * buffer, int bufferSize){
-	OSCData * datum = getOSCData(position);
-	if (!hasError()){
+int OSCMessage::getString(int position, char * buffer, int bufferSize, int offset, int size){
+    OSCData * datum = getOSCData(position);
+    if (!hasError()){
         //the number of bytes to copy is the smaller between the buffer size and the datum's byte length
         int copyBytes = bufferSize < datum->bytes? bufferSize : datum->bytes;
-		return datum->getBlob(buffer, copyBytes);
+        return datum->getString(buffer, copyBytes, offset, size);
     } else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (int)NULL;
         #else
-            return -1; 
+            return -1;
         #endif
     }
+}
+
+
+int OSCMessage::getBlob(int position, uint8_t * buffer){
+    OSCData * datum = getOSCData(position);
+    if (!hasError()){
+        return datum->getBlob(buffer);
+  } else {
+    #ifndef ESPxx
+        return NULL;
+    #else
+        return -1;
+    #endif
+  }
+}
+
+int OSCMessage::getBlob(int position, uint8_t * buffer, int bufferSize){
+    OSCData * datum = getOSCData(position);
+    if (!hasError()){
+        return datum->getBlob(buffer, bufferSize);
+  } else {
+    #ifndef ESPxx
+        return NULL;
+    #else
+        return -1;
+    #endif
+  }
+}
+
+int OSCMessage::getBlob(int position, uint8_t * buffer, int bufferSize, int offset, int size){
+    OSCData * datum = getOSCData(position);
+    if (!hasError()){
+        return datum->getBlob(buffer, bufferSize, offset, size);
+  } else {
+    #ifndef ESPxx
+        return NULL;
+    #else
+        return -1;
+    #endif
+  }
+}
+
+uint32_t OSCMessage::getBlobLength(int position)
+{
+  OSCData * datum = getOSCData(position);
+  if (!hasError()){
+    return datum->getBlobLength();
+  } else {
+    #ifndef ESPxx
+        return NULL;
+    #else
+        return -1;
+    #endif
+  }
+
 }
 
 char OSCMessage::getType(int position){
@@ -217,10 +287,10 @@ char OSCMessage::getType(int position){
 	if (!hasError()){
 		return datum->type;
 	} else {
-        #ifndef ESP8266
-            return NULL;
+        #ifndef ESPxx
+            return (int)NULL;
         #else
-            return '\0'; 
+            return '\0';
         #endif
     }
 }
@@ -445,7 +515,7 @@ OSCMessage& OSCMessage::send(Print &p){
     // for long complex messages
     {
         uint8_t typstr[dataCount];
-    
+
         for (int i = 0; i < dataCount; i++){
             typstr[i] =  getType(i);
         }
@@ -583,7 +653,7 @@ void OSCMessage::decodeData(uint8_t incomingByte){
                             uint8_t b[8];
                         } u;
                         memcpy(u.b, incomingBuffer, 8);
-                       
+
                         u.t.seconds = BigEndian(u.t.seconds);
                         u.t.fractionofseconds = BigEndian(u.t.fractionofseconds);
                         set(i, u.t);
@@ -608,18 +678,18 @@ void OSCMessage::decodeData(uint8_t incomingByte){
                         } u;
                         memcpy(u.b, incomingBuffer, 4);
                         uint32_t blobLength = BigEndian(u.i);
-                        if (incomingBufferSize == blobLength + 4){
+                        if (incomingBufferSize == (int)(blobLength + 4)){
                             set(i, incomingBuffer + 4, blobLength);
                             clearIncomingBuffer();
                             decodeState = DATA_PADDING;
                         }
-                        
+
                     }
                     break;
             }
             //break out of the for loop once we've selected the first invalid message
             break;
-        } 
+        }
     }
 }
 
@@ -639,7 +709,7 @@ void OSCMessage::decode(uint8_t incomingByte){
                 decodeAddress();
 				//next state
 				decodeState = ADDRESS_PADDING;
-			} 
+			}
 			break;
 		case ADDRESS_PADDING:
             //it does not count the padding
@@ -693,7 +763,8 @@ void OSCMessage::decode(uint8_t incomingByte){
                 }
             }
 			break;
-
+		case DONE:
+			break; // TODO: is this correct? - was missing from original code, it did this by default
     }
 }
 
@@ -730,6 +801,6 @@ void OSCMessage::clearIncomingBuffer(){
 		error = ALLOCFAILED;
         incomingBuffer = NULL;
 
-	}    
+	}
     incomingBufferSize = 0;
 }

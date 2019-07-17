@@ -104,7 +104,7 @@ public:
 =============================================================================*/
     
 	//start a new OSC Message in the bundle
-    OSCMessage & add( char * address);
+    OSCMessage & add(const char * address);
     //add with nothing in it produces an invalid osc message
 	//copies an existing message into the bundle
 	OSCMessage & add(OSCMessage & msg);
@@ -169,7 +169,7 @@ public:
     
     OSCBundle& fill(uint8_t incomingByte);
     
-    OSCBundle& fill(uint8_t * incomingBytes, int length);
+    OSCBundle& fill(const uint8_t * incomingBytes, int length);
 };
 
 #endif

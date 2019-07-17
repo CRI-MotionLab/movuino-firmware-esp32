@@ -67,7 +67,7 @@ OSCBundle& OSCBundle::empty(){
  SETTERS
  =============================================================================*/
 
-OSCMessage & OSCBundle::add(char * _address){
+OSCMessage & OSCBundle::add(const char * _address){
 	OSCMessage * msg = new OSCMessage(_address);
     if (!msg->hasError()){
         //realloc the array to fit the message
@@ -125,6 +125,7 @@ OSCMessage * OSCBundle::getOSCMessage( char * addr){
             return msg;
         }
 	}
+	return NULL;
 }
 
 //the position is the same as the order they were declared in
@@ -132,6 +133,7 @@ OSCMessage * OSCBundle::getOSCMessage(int pos){
 	if (pos < numMessages){
 		return messages[pos];
 	} 
+	return NULL;
 }
 
 /*=============================================================================
@@ -232,7 +234,7 @@ OSCBundle& OSCBundle::fill(uint8_t incomingByte){
     return *this;
 }
 
-OSCBundle& OSCBundle::fill(uint8_t * incomingBytes, int length){
+OSCBundle& OSCBundle::fill(const uint8_t * incomingBytes, int length){
     while (length--){
         decode(*incomingBytes++);
     }
@@ -289,6 +291,8 @@ void OSCBundle::decode(uint8_t incomingByte){
             if (incomingByte == '#'){
                 decodeState = HEADER;
             } else if (incomingByte == '/'){
+                add();//add a simple message to the bundle
+                decodeMessage(incomingByte);
                 decodeState = MESSAGE;
             }
             break;
