@@ -1,8 +1,8 @@
 # movuino esp32 firmware
 
-this is a port of the esp8266 version of the movuino firmware for use with the movuina software (cri-motionlab's movuino-firmware repository).
+this is a port of the esp8266 version of the movuino firmware (cri-motionlab's movuino-firmware repository) for use with the movuina software.
 
-everything is supposed to work the same, except the access point mode which is not enabled here (configuration must be achieved using osc messages through the serial port).
+everything is supposed to work the same, except the status led which is not present anymore on the esp32 version of movuino.
 
 ### how to flash this firmware
 
